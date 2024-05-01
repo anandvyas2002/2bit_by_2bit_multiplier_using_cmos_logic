@@ -1,0 +1,74 @@
+*main ckt using subckt*
+
+.model nmod nmos level=54 version=4.7
+.model pmod pmos level=54 version=4.7
+
+.subckt inv1 100 101 102 103 ;defining inverter subcircuit
+M1 101 103 100 100 nmod w=100u l=10u ;D G S B is the order
+M2 101 103 102 102 pmod w=100u l=10u
+.ends
+
+.subckt and1 104 105 106 107 108 109 110 ;defining and subcircuit
+M3 107 105 104 104 nmod w=100u l=10u ;D G S B is the order
+M4 108 106 107 107 nmod w=100u l=10u
+M5 108 105 109 109 pmod w=100u l=10u
+M6 108 106 109 109 pmod w=100u l=10u
+xinv1 104 110 109 108 inv1	;instantiating subckt
+.ends
+
+.subckt or1 111 112 113 114 115 116 117 ;defining or subcircuit
+M7 114 112 111 111 nmod w=100u l=10u ;D G S B is the order
+M8 114 113 111 111 nmod w=100u l=10u
+M9 114 112 115 115 pmod w=100u l=10u
+M10 115 113 116 116 pmod w=100u l=10u
+xinv2 111 117 116 114 inv1	;instantiating subckt
+.ends
+
+.subckt xor1 118 119 120 121 122 123 124 125 126 127 128 ;defining xor subcircuit
+xinv3 118 121 128 119 inv1 
+xinv4 118 122 128 120 inv1
+M11 124 121 118 118 nmod w=100u l=10u ;D G S B is the order
+M12 125 122 124 124 nmod w=100u l=10u
+M13 123 119 118 118 nmod w=100u l=10u
+M14 125 120 123 123 nmod w=100u l=10u
+M15 125 121 127 127 pmod w=100u l=10u
+M16 127 120 128 128 pmod w=100u l=10u
+M17 125 119 126 126 pmod w=100u l=10u
+M18 126 122 128 128 pmod w=100u l=10u
+.ends
+
+x1and 0 1 2 5 6 7 8 and1 ;a0 and b0 output p0 at 8
+x2and 0 2 3 9 10 11 12 and1 ;a1 and b0 output at 12
+x3and 0 1 4 13 14 15 16 and1 ;a0 and b1 output at 16
+x4xor 0 12 16 17 18 19 20 21 22 23 24 xor1 ;a1b0 xor a0b1 output p1 at 21
+x5and 0 12 16 25 26 27 28 and1 ;a1b0 and a0b1 output at 28
+x6and 0 3 4 29 30 31 32 and1 ;a1 and b1 output at 32
+x7xor 0 28 32 33 34 35 36 37 38 39 40 xor1 ;a1b1 xor c1 output p2 at 37
+x8and 0 28 32 41 42 43 44 and1 ;a1b1 and c1 output p3 at 44
+
+vd1 7 0 5
+vd2 11 0 5
+vd3 15 0 5
+vd4 24 0 5
+vd5 27 0 5
+vd6 31 0 5
+vd7 40 0 5
+vd8 43 0 5
+va0 1 0 pulse(0 5 0 5ns 5ns 10m 20m)
+vb0 2 0 pulse(0 5 0 5ns 5ns 15m 30m)
+va1 3 0 pulse(0 5 0 5ns 5ns 20m 40m)
+vb1 4 0 pulse(0 5 0 5ns 5ns 25m 50m)
+
+.tran 0.1m 60m
+.control
+run
+plot v(1)
+plot v(2)
+plot v(3)
+plot v(4)
+plot v(8)
+plot v(21)
+plot v(37)
+plot v(44)
+.endc
+.end
